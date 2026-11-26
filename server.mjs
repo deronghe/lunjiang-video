@@ -832,6 +832,12 @@ const handler = async (req, res) => {
 
 const server = http.createServer(handler)
 
+// 首次运行自举：缺 .password 就写入默认值并在控制台明示，缺 .cache 由上方 mkdir 处理
+if (!fs.existsSync(AUTH_PASSWORD_FILE) && !process.env.LJ_PASSWORD) {
+  try { fs.writeFileSync(AUTH_PASSWORD_FILE, 'lunjiang2026') } catch {}
+  console.log('  [首次启动] 已生成 .password，默认密码: lunjiang2026（请改掉，改完无需重启）')
+}
+
 server.listen(PORT, '0.0.0.0', () => {
   const ips = Object.values(os.networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address)
   console.log(`伦酱视频 · 在线片库 serving ${__dirname}`)
