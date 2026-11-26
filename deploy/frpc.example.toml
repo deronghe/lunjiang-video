@@ -1,0 +1,36 @@
+# frp 客户端配置示例（frpc 0.7x TOML）
+# 复制为 frpc.toml 后填入自己的值；frpc.toml 已被 .gitignore 排除
+
+serverAddr = "FRP_SERVER_HOST"
+serverPort = 7000
+
+auth.method = "token"
+auth.token = "FRP_AUTH_TOKEN"
+
+log.to = "console"
+log.level = "info"
+log.maxDays = 3
+
+transport.tcpMux = true
+transport.tls.enable = true
+transport.heartbeatInterval = 10
+transport.heartbeatTimeout = 30
+transport.dialServerTimeout = 10
+
+# 客户端管理面板（本机访问）
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "admin"
+webServer.password = "ADMIN_PASSWORD"
+
+[[proxies]]
+name = "svc-8899"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8899
+remotePort = 8899
+transport.useEncryption = true
+healthCheck.type = "tcp"
+healthCheck.timeoutSeconds = 3
+healthCheck.maxFailed = 3
+healthCheck.intervalSeconds = 10

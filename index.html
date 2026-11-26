@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="伦酱视频">
+<meta name="theme-color" content="#EB485A">
+<link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png?v=6">
+<link rel="icon" href="/icon-192.png?v=6">
+<link rel="manifest" href="/manifest.webmanifest">
+<title>伦酱视频 · 在线片库</title>
+<style>
+  :root{
+    --brand:#EB485A; --brand-2:#FF7A8A; --ink:#141418; --muted:#8b8b93;
+    --bg:#f6f6f8; --card:#fff; --line:#ececf0;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  header{padding:calc(var(--safe-t) + 14px) 16px 10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    color:#fff;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+  header img{width:44px;height:44px;border-radius:11px;box-shadow:0 6px 18px rgba(0,0,0,.22);background:#fff;object-fit:cover;cursor:zoom-in}
+  header h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.5px}
+  header p{margin:2px 0 0;font-size:11px;opacity:.9}
+  .pill{margin-left:auto;font-size:11px;background:rgba(255,255,255,.22);padding:5px 9px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.35)}
+
+  nav{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:#fff;position:sticky;
+    top:calc(var(--safe-t) + 68px);z-index:19;border-bottom:1px solid var(--line);scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{flex:0 0 auto;border:0;background:#f2f2f6;color:#5c5c66;font-size:13px;font-weight:600;
+    padding:8px 14px;border-radius:999px;transition:.18s}
+  nav button.on{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(235,72,90,.35)}
+
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 0;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chips button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#5c5c66;font-size:12px;
+    padding:6px 11px;border-radius:999px}
+  .chips button.on{background:#151519;color:#fff;border-color:#151519}
+  .hint{padding:6px 14px 0;color:var(--muted);font-size:11px}
+
+  main{padding:12px 12px calc(28px + var(--safe-b))}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(20,20,24,.06);
+    display:flex;flex-direction:column;position:relative}
+  .card:active{transform:scale(.985)}
+  .thumb{position:relative;aspect-ratio:3/4;background:#e9e9ee;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#b9b9c2;font-size:12px}
+  img.imgfail{opacity:0}
+  .tag{position:absolute;right:8px;top:8px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;
+    background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px)}
+  .tag.free{background:rgba(22,163,74,.9)}
+  .tag.ready{left:8px;right:auto;background:var(--brand)}
+  .dur{position:absolute;left:8px;bottom:8px;font-size:11px;padding:2px 6px;border-radius:6px;
+    background:rgba(0,0,0,.6);color:#fff}
+  .body{padding:9px 10px 11px}
+  .title{font-size:13px;font-weight:600;line-height:1.35;height:2.7em;overflow:hidden;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .meta{margin-top:6px;font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .dot{width:3px;height:3px;border-radius:50%;background:#d2d2d8}
+
+  /* 排行榜列表 */
+  .rows{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;gap:10px;background:#fff;border-radius:12px;padding:8px;box-shadow:0 2px 10px rgba(20,20,24,.05)}
+  .row .rk{width:26px;flex:0 0 26px;display:flex;align-items:center;justify-content:center;
+    font:700 15px/1 -apple-system;color:#b9b9c2}
+  .row .rk.top{color:var(--brand)}
+  .row img{width:66px;height:88px;border-radius:8px;object-fit:cover;background:#e9e9ee;flex:0 0 66px}
+  .row .info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
+  .row .nm{font-size:13px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden}
+  .row .sub{font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+
+  /* 排行榜：一行两个 */
+  .rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .rcard{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(20,20,24,.06);
+    display:flex;flex-direction:column}
+  .rcard .ph{position:relative;width:100%;aspect-ratio:16/10;background:#101014}
+  .rcard .ph img{width:100%;height:100%;object-fit:contain;display:block}
+  .rcard .ph .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#4a4a52;font-size:11px}
+  .rcard .rk{position:absolute;top:6px;left:6px;min-width:20px;height:20px;padding:0 7px;
+    display:flex;align-items:center;justify-content:center;border-radius:7px;
+    background:rgba(0,0,0,.62);color:#fff;font:700 11px/1 -apple-system}
+  .rcard .rk.top{background:var(--brand)}
+  .rcard .du{position:absolute;right:6px;bottom:6px;padding:2px 6px;border-radius:5px;
+    background:rgba(0,0,0,.6);color:#fff;font:500 10px/1.4 -apple-system}
+  .rcard .tx{padding:8px 9px 10px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .rcard .tt{font-size:13px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden;min-height:35px}
+  .rcard .sub{font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+  /* 女优 */
+  .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .g{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(20,20,24,.05)}
+  .g .ava{aspect-ratio:1/1;background:#e9e9ee}
+  .g img{width:100%;height:100%;object-fit:cover;display:block}
+  .g .n{padding:7px 8px;font-size:12px;font-weight:600;text-align:center;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sheet{position:fixed;inset:0;background:rgba(10,10,12,.55);z-index:70;display:none}
+  .sheet.on{display:block}
+  .sheet .panel{position:absolute;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:var(--bg);
+    border-radius:16px 16px 0 0;padding:14px 14px calc(18px + var(--safe-b))}
+  .sheet .hd{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+  .sheet .hd img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#e9e9ee}
+  .sheet .hd h3{margin:0;font-size:15px}
+  .sheet .hd p{margin:3px 0 0;font-size:11.5px;color:var(--muted)}
+  .sheet .intro{font-size:12px;color:#5c5c66;line-height:1.6;margin:6px 0 10px;max-height:9em;overflow:auto}
+  .closer{position:absolute;right:12px;top:12px;border:0;background:#eee;color:#555;width:26px;height:26px;border-radius:50%}
+
+  /* 专题 */
+  .tgrid{display:grid;grid-template-columns:1fr;gap:12px}
+  .t{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(20,20,24,.06)}
+  .t .bn{aspect-ratio:16/7;background:#e9e9ee}
+  .t img{width:100%;height:100%;object-fit:cover;display:block}
+  .t .tb{padding:9px 11px 11px}
+  .t .tn{font-size:13.5px;font-weight:700;line-height:1.35}
+  .t .tm{margin-top:5px;font-size:11px;color:var(--muted);display:flex;gap:8px}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:13px}
+
+  .player{position:fixed;inset:0;background:#000;z-index:80;display:none;flex-direction:column}
+  .player.on{display:flex}
+  .player .bar{display:flex;align-items:center;gap:10px;padding:calc(var(--safe-t) + 10px) 14px 10px;color:#fff;font-size:13px}
+  .player .bar b{font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .player .close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.16);border:0;color:#fff;font-size:16px}
+  /* 播放器：保持原生控件外观，只在底部叠一条常驻的细进度条，拖动它不会触发系统变暗/大图标 */
+  .stage{position:relative;flex:1;min-height:0;display:flex;background:#000}
+  .player video{width:100%;height:100%;background:#000;object-fit:contain}
+  .pbar{position:absolute;left:0;right:0;bottom:0;height:16px;z-index:6;touch-action:none}
+  .pbar .track{position:absolute;left:0;right:0;bottom:5px;height:3px;background:rgba(255,255,255,.34)}
+  .pbar .fill{position:absolute;left:0;bottom:5px;height:3px;background:var(--brand);width:0}
+  .pbar .dot{position:absolute;bottom:1.5px;width:10px;height:10px;border-radius:50%;background:#fff;
+    box-shadow:0 0 4px rgba(0,0,0,.5);transform:translateX(-50%);left:0}
+  /* 常驻时间：当前 / 总长 */
+  .ptime{position:absolute;right:8px;bottom:16px;padding:3px 7px;border-radius:6px;
+    background:rgba(0,0,0,.55);color:#fff;font:500 10.5px/1 -apple-system,sans-serif;
+    font-variant-numeric:tabular-nums;letter-spacing:.2px;pointer-events:none;white-space:nowrap}
+  /* 拖动时跟在手指上方的实时定位气泡 */
+  .pbub{position:absolute;bottom:26px;left:0;transform:translateX(-50%);padding:4px 8px;border-radius:6px;
+    background:rgba(0,0,0,.78);color:#fff;font:600 11px/1 -apple-system,sans-serif;
+    font-variant-numeric:tabular-nums;opacity:0;transition:opacity .12s;pointer-events:none;white-space:nowrap}
+  .pbub.on{opacity:1}
+
+  .player .foot{padding:12px 14px calc(14px + var(--safe-b));color:#9a9aa2;font-size:11.5px;line-height:1.6}
+  .player .foot b{color:#fff;font-weight:500}
+  .srcrow{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .srcb{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#d8d8de;
+    font-size:11px;padding:5px 9px;border-radius:999px}
+  .srcb.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .imgview{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:96;display:none;align-items:center;justify-content:center;padding:16px}
+  .imgview.on{display:flex}
+  .imgview img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 12px 46px rgba(0,0,0,.6)}
+  .imgview .ivhint{position:absolute;left:50%;bottom:calc(22px + var(--safe-b));transform:translateX(-50%);color:#bbb;font-size:12px}
+  .toast{position:fixed;left:50%;bottom:calc(26px + var(--safe-b));transform:translateX(-50%) translateY(20px);
+    background:rgba(20,20,24,.92);color:#fff;font-size:12.5px;padding:10px 16px;border-radius:999px;
+    opacity:0;transition:.22s;z-index:90;max-width:84vw;text-align:center}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ── 开头广告（必须看满 5 秒）── */
+#splash{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease}
+#splash.hide{opacity:0;pointer-events:none}
+#splash img{width:100%;height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
+#splash .sp-bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.18)}
+#splash .sp-fill{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .1s linear}
+#splash .sp-tip{position:absolute;bottom:calc(18px + var(--safe-b,0px));left:50%;transform:translateX(-50%);
+  color:#fff;font-size:13px;letter-spacing:.5px;background:rgba(0,0,0,.42);padding:7px 14px;border-radius:999px;
+  backdrop-filter:blur(6px);white-space:nowrap}
+#splash .sp-num{font-weight:700;font-variant-numeric:tabular-nums;color:#FFD166}
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="/splash.jpg?v=8" alt="开场画面" draggable="false">
+  <div class="sp-bar"><div class="sp-fill" id="spFill"></div></div>
+  <div class="sp-tip">看满 <span class="sp-num" id="spNum">5</span> 秒后自动进入</div>
+</div>
+<header>
+  <img id="logo" src="/logo.jpg?v=6" alt="伦酱视频" title="点我看大图">
+  <div><h1 id="brand">伦酱视频</h1><p id="sub">在线片库</p></div>
+  <div class="pill" id="stat">—</div>
+</header>
+<nav id="tabs"></nav>
+<div class="chips" id="chips" style="display:none"></div>
+<div class="hint" id="hint" style="display:none"></div>
+<main><div class="grid" id="grid"></div><div class="rows" id="rows" style="display:none"></div>
+  <div class="ggrid" id="ggrid" style="display:none"></div>
+  <div class="tgrid" id="tgrid" style="display:none"></div>
+  <div class="empty" id="empty" style="display:none">没有内容</div></main>
+
+<div class="sheet" id="sheet"><div class="panel">
+  <button class="closer" id="sheetClose">✕</button>
+  <div class="hd"><img id="gAva" alt=""><div><h3 id="gName"></h3><p id="gMeta"></p></div></div>
+  <div class="intro" id="gIntro"></div>
+  <div class="rows" id="gWorks"></div>
+</div></div>
+
+<div class="player" id="player">
+  <div class="bar"><b id="ptitle"></b><button class="close" id="pclose">✕</button></div>
+  <div class="stage">
+    <video id="video" controls autoplay playsinline preload="metadata"></video>
+    <div class="pbar" id="pbar">
+      <div class="track"></div><div class="fill" id="pfill"></div><div class="dot" id="pdot"></div>
+      <span class="ptime" id="ptime">0:00 / 0:00</span>
+      <span class="pbub" id="pbub"></span>
+    </div>
+  </div>
+  <div class="foot" id="pfoot"></div>
+</div>
+<div class="imgview" id="imgview">
+  <img id="imgviewImg" alt="伦酱视频">
+  <span class="ivhint">点任意处关闭</span>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+document.addEventListener('error', function(e){
+  if (e.target && e.target.tagName === 'IMG') e.target.classList.add('imgfail')
+}, true)
+</script>
+<script src="/hls.min.js"></script>
+<script>
+const $ = s => document.querySelector(s)
+const fmt = n => n >= 10000 ? (n / 10000).toFixed(1) + 'w' : String(n ?? 0)
+const mmss = s => !s ? '' : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0')
+const hhmm = s => { if (!s) return ''; const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? `${h}:${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}` : `${m}:${String(s % 60).padStart(2, '0')}` }
+const len2s = t => { const p = String(t || '').split(':').map(Number); if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2]; if (p.length === 2) return p[0] * 60 + p[1]; return 0 }
+let data = null
+
+function toast(msg, ms = 1900) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on')
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ms)
+}
+const coverUrl = p => p ? `/cover?p=${encodeURIComponent(p)}` : ''
+
+/* ---------- 播放器：原生控件不动，底部常驻细进度条 + 实时时间 ---------- */
+const PL = { id: 0, dragging: false, ratio: null, segs: [], inFlight: new Set() }
+
+// 分片内存缓存：拖动时提前把目标分片拉下来，松手直接命中（Safari 原生播放靠 HTTP 缓存，同样受益）
+const SEG = new Map()
+const SEG_MAX = 8          // 最多留 8 个分片（约 6MB）
+function segPut(url, buf) {
+  if (SEG.has(url)) return
+  SEG.set(url, buf)
+  while (SEG.size > SEG_MAX) SEG.delete(SEG.keys().next().value)
+}
+function prefetchSeg(url) {
+  if (!url || SEG.has(url) || PL.inFlight.has(url)) return
+  PL.inFlight.add(url)
+  fetch(url, { cache: 'force-cache' })
+    .then(r => (r.ok ? r.arrayBuffer() : null))
+    .then(b => { if (b && b.byteLength) segPut(url, b) })
+    .catch(() => { })
+    .finally(() => PL.inFlight.delete(url))
+}
+// 把 t 秒映射到分片下标（用播放列表的真实 EXTINF 累加）
+function segAt(t) {
+  const segs = PL.segs
+  if (!segs.length) return -1
+  for (let i = 0; i < segs.length; i++) if (t < segs[i].end) return i
+  return segs.length - 1
+}
+// 手指停住时预热「当前位置 + 下一段」
+function prefetchAt(t) {
+  const i = segAt(t)
+  if (i < 0) return
+  prefetchSeg(PL.segs[i] && PL.segs[i].url)
+  prefetchSeg(PL.segs[i + 1] && PL.segs[i + 1].url)
+}
+async function loadSegmentIndex(id, src, viaProxy) {
+  const qs = []
+  if (src) qs.push('src=' + src)
+  if (viaProxy) qs.push('direct=0')
+  const url = '/live/' + id + '.m3u8' + (qs.length ? '?' + qs.join('&') : '')
+  try {
+    const text = await (await fetch(url, { cache: 'no-store' })).text()
+    const segs = []
+    let cur = 0, pending = 0
+    for (const line of text.split('\n')) {
+      const t = line.trim()
+      if (!t) continue
+      if (t.startsWith('#EXTINF:')) { pending = parseFloat(t.slice(8)) || 0; continue }
+      if (t.startsWith('#')) continue
+      const start = cur
+      cur += pending
+      pending = 0
+      segs.push({ url: t, start, end: cur })
+    }
+    if (PL.id === id) PL.segs = segs
+  } catch { /* 拿不到索引就退化为不预热 */ }
+}
+
+function fmtT(s) {
+  if (!isFinite(s) || s < 0) return '0:00'
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = Math.floor(s % 60)
+  return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0')
+    : m + ':' + String(x).padStart(2, '0')
+}
+
+function paintBar() {
+  const v = document.querySelector('#video')
+  const d = v.duration || 0
+  const r = d ? Math.min(1, v.currentTime / d) : 0
+  document.querySelector('#pfill').style.width = (r * 100) + '%'
+  document.querySelector('#pdot').style.left = (r * 100) + '%'
+  document.querySelector('#ptime').textContent = fmtT(v.currentTime) + ' / ' + (d ? fmtT(d) : '0:00')
+}
+
+function attachPlayer() {
+  const v = document.querySelector('#video')
+  const bar = document.querySelector('#pbar')
+  if (!v._wired) {
+    v._wired = true
+    v.addEventListener('timeupdate', paintBar)
+    v.addEventListener('loadedmetadata', paintBar)
+    v.addEventListener('durationchange', paintBar)
+    v.addEventListener('progress', paintBar)
+  }
+  if (bar._wired) return
+  bar._wired = true
+
+  const bub = document.querySelector('#pbub')
+  let seekTimer = 0
+  // 停手 120ms 才真正跳：拖动风暴（每秒十几次 seek）会不停打断分片下载，反而更卡
+  const seekLive = (t) => {
+    try {
+      if (typeof v.fastSeek === 'function') v.fastSeek(t)
+      else v.currentTime = t
+    } catch {
+      try { v.currentTime = t } catch { }
+    }
+  }
+  const moveTo = (r) => {
+    document.querySelector('#pfill').style.width = (r * 100) + '%'
+    document.querySelector('#pdot').style.left = (r * 100) + '%'
+    bub.style.left = (r * 100) + '%'
+  }
+  const preview = (clientX, force) => {
+    const rc = bar.getBoundingClientRect()
+    const r = Math.min(1, Math.max(0, (clientX - rc.left) / rc.width))
+    const d = v.duration || 0
+    PL.ratio = r
+    moveTo(r)
+    bub.textContent = fmtT(r * d)
+    bub.classList.add('on')
+    document.querySelector('#ptime').textContent = fmtT(r * d) + ' / ' + (d ? fmtT(d) : '0:00')
+    if (!d) return
+    const target = Math.min(d - 0.25, r * d)
+    clearTimeout(seekTimer)
+    if (force) { seekLive(target); prefetchAt(target) }
+    else seekTimer = setTimeout(() => { seekLive(target); prefetchAt(target) }, 120)
+  }
+  // 松手时精确落到最终点（fastSeek 只到关键帧，这里用精确 seek 收尾）
+  const applySeek = () => {
+    const d = v.duration || 0
+    if (!d || PL.ratio == null) return
+    const t = Math.min(d - 0.25, Math.max(0, PL.ratio * d))
+    try { v.currentTime = t } catch { }
+    document.querySelector('#ptime').textContent = fmtT(t) + ' / ' + fmtT(d)
+  }
+  // 只接管这一条：pointer 事件全部拦下，不会触发系统控件的压暗/大图标
+  bar.addEventListener('pointerdown', e => {
+    PL.dragging = true
+    try { bar.setPointerCapture(e.pointerId) } catch { }
+    preview(e.clientX, true)
+    e.preventDefault(); e.stopPropagation()
+  })
+  bar.addEventListener('pointermove', e => {
+    if (!PL.dragging) return
+    preview(e.clientX, false)
+    e.preventDefault(); e.stopPropagation()
+  })
+  const end = e => {
+    if (PL.dragging) {
+      PL.dragging = false
+      if (e && e.clientX != null && e.type === 'pointerup') preview(e.clientX, true)
+      applySeek()
+      bub.classList.remove('on')
+      setTimeout(paintBar, 60)
+    }
+    if (e) e.stopPropagation()
+  }
+  bar.addEventListener('pointerup', end)
+  bar.addEventListener('pointercancel', end)
+  bar.addEventListener('lostpointercapture', end)
+  // 手指划出进度条再松开也要落点
+  window.addEventListener('pointerup', e => { if (PL.dragging) end(e) })
+  bar.addEventListener('click', e => e.stopPropagation())
+}
+
+// hls.js 自定义分片加载器：命中内存缓存就直接交付，省一次网络往返
+function makeFragLoader() {
+  if (!window.Hls || !window.Hls.DefaultConfig || !window.Hls.DefaultConfig.loader) return undefined
+  class CachedFragLoader extends window.Hls.DefaultConfig.loader {
+    load(context, config, callbacks) {
+      const url = context && context.url
+      const hit = url ? SEG.get(url) : null
+      if (hit) {
+        const now = performance.now()
+        callbacks.onSuccess(
+          { url, data: hit, code: 200, text: '' },
+          { trequest: now, tfirst: now, tload: now, loaded: hit.byteLength, total: hit.byteLength, retry: 0 },
+          context, null
+        )
+        return
+      }
+      const ok = callbacks.onSuccess
+      callbacks.onSuccess = (res, stats, ctx, net) => {
+        try { if (url && res && res.data && res.data.byteLength) segPut(url, res.data) } catch { }
+        ok(res, stats, ctx, net)
+      }
+      super.load(context, config, callbacks)
+    }
+  }
+  return CachedFragLoader
+}
+
+function startStream(it, src, viaProxy) {
+  const v = document.querySelector('#video')
+  if (v._hls) { v._hls.destroy(); v._hls = null }
+  const qs = []
+  if (src) qs.push('src=' + src)
+  if (viaProxy) qs.push('direct=0')
+  const url = '/live/' + it.id + '.m3u8' + (qs.length ? '?' + qs.join('&') : '')
+  const retryProxy = () => {
+    if (!viaProxy) { toast('直连不稳，切到中转线路'); startStream(it, src, true) }
+    else toast('拉流失败，换个线路试试')
+  }
+  // 拿分片索引 → 起播时先把第 0、1 段预热
+  loadSegmentIndex(it.id, src, viaProxy).then(() => prefetchAt(0))
+  if (v.canPlayType('application/vnd.apple.mpegurl')) {
+    v.src = url
+    v.onerror = retryProxy
+  } else if (window.Hls && window.Hls.isSupported()) {
+    const cfg = {
+      enableWorker: true,
+      lowLatencyMode: false,
+      maxBufferLength: 24,
+      maxMaxBufferLength: 48,
+      backBufferLength: 6,
+      maxBufferSize: 48 * 1000 * 1000,
+      capLevelToPlayerSize: true,
+      startLevel: -1,
+      startFragPrefetch: true,
+      maxFragLookUpTolerance: 0.5,
+      abrEwmaDefaultEstimate: 2000000,
+    }
+    const Loader = makeFragLoader()
+    if (Loader) cfg.fLoader = Loader
+    const h = new window.Hls(cfg)
+    h.on(window.Hls.Events.ERROR, (_e, d) => {
+      if (!d || !d.fatal) return
+      h.destroy(); v._hls = null
+      retryProxy()
+    })
+    h.loadSource(url); h.attachMedia(v); v._hls = h
+  } else {
+    v.src = url; v.onerror = retryProxy
+  }
+  v.play().catch(() => { })
+}
+
+function playItem(it) {
+  const p = document.querySelector('#player')
+  PL.id = it.id
+  document.querySelector('#ptitle').textContent = it.title || it.name || ''
+  document.querySelector('#pfoot').textContent = '正在连接线路…'
+  document.querySelector('#pfill').style.width = '0%'
+  document.querySelector('#pdot').style.left = '0%'
+  p.classList.add('on')
+  attachPlayer()
+
+  // 立刻开播，线路信息后补
+  startStream(it, '')
+
+  fetch(`/live/${it.id}/info`).then(r => r.json()).then(info => {
+    if (PL.id !== it.id) return
+    const vs = info.variants || {}
+    const keys = Object.keys(vs)
+    const cur = info.chosen || keys[0]
+    const label = (k, v) => (vs[k] && vs[k].label) || (k === '20' ? '试看' : '线路 ' + k)
+    const btns = keys.map(k => `<button class="srcb${k === cur ? ' on' : ''}" data-src="${k}">${label(k, vs[k])} ${hhmm(vs[k].dur)}</button>`).join('')
+    document.querySelector('#pfoot').innerHTML =
+      `${it.nav || ''} · ${fmt(it.views)} 播放 · ${keys.length} 条线路<div class="srcrow">${btns}</div>`
+    document.querySelector('#pfoot').querySelectorAll('.srcb').forEach(b => b.onclick = () => {
+      document.querySelector('#pfoot').querySelectorAll('.srcb').forEach(x => x.classList.toggle('on', x === b))
+      startStream(it, b.dataset.src)
+    })
+  }).catch(() => { })
+}
+// 点击左上角头像 → 看大图
+document.querySelector('#logo').addEventListener('click', e => {
+  e.stopPropagation()
+  document.querySelector('#imgviewImg').src = document.querySelector('#logo').src
+  document.querySelector('#imgview').classList.add('on')
+})
+document.querySelector('#imgview').addEventListener('click', () => {
+  document.querySelector('#imgview').classList.remove('on')
+})
+document.querySelector('#pclose').onclick = () => {
+  const v = document.querySelector('#video')
+  v.pause()
+  if (v._hls) { v._hls.destroy(); v._hls = null }
+  v.removeAttribute('src'); v.load()
+  document.querySelector('#player').classList.remove('on')
+}
+/* ---------- 内容卡片（栏目） ---------- */
+function card(it) {
+  const el = document.createElement('div')
+  el.className = 'card'
+  el.dataset.id = it.id
+  const badge = it.points > 0 ? `<span class="tag">${it.points} 积分</span>` : `<span class="tag free">免费</span>`
+  el.innerHTML = `
+    <div class="thumb">
+      ${it.cover ? `<img loading="lazy" src="${coverUrl(it.cover)}" alt="">` : '<div class="ph">无封面</div>'}
+      <span class="tag ready">▶ 在线</span>${badge}
+      ${it.seconds ? `<span class="dur">${hhmm(it.seconds)}</span>` : ''}
+    </div>
+    <div class="body">
+      <div class="title">${it.title}</div>
+      <div class="meta">${it.author ? `<span>${it.author}</span><i class="dot"></i>` : ''}<span>${fmt(it.views)} 浏览</span></div>
+    </div>`
+  el.onclick = () => playItem({ ...it, name: it.title })
+  return el
+}
+
+function showOnly(which) {
+  $('#grid').style.display = which === 'grid' ? 'grid' : 'none'
+  $('#rows').style.display = which === 'rows' ? 'flex' : 'none'
+  $('#ggrid').style.display = which === 'girls' ? 'grid' : 'none'
+  $('#tgrid').style.display = which === 'topics' ? 'grid' : 'none'
+  $('#empty').style.display = 'none'
+}
+
+/* ---------- 专题合集 ---------- */
+async function renderTopics() {
+  showOnly('topics')
+  $('#chips').style.display = 'none'
+  $('#hint').style.display = 'block'
+  $('#hint').textContent = '官方专题合集 · 点开看合集内全部影片'
+  const grid = $('#tgrid')
+  grid.innerHTML = '<div class="hint">加载专题…</div>'
+  try {
+    const r = await (await fetch('/api/topics?page=1')).json()
+    const topics = r.topics || []
+    grid.innerHTML = ''
+    topics.forEach(t => {
+      const el = document.createElement('div')
+      el.className = 't'
+      el.innerHTML = `
+        <div class="bn"><img loading="lazy" src="${coverUrl(t.banner || t.cover)}" alt=""></div>
+        <div class="tb">
+          <div class="tn">${t.name}</div>
+          <div class="tm"><span>${t.count} 部</span><i class="dot"></i><span>${fmt(t.click)} 次浏览</span></div>
+        </div>`
+      el.onclick = () => openTopic(t)
+      grid.appendChild(el)
+    })
+    if (!topics.length) { grid.innerHTML = ''; $('#empty').style.display = 'block'; $('#empty').textContent = '暂无专题' }
+  } catch { grid.innerHTML = '<div class="hint">专题加载失败</div>' }
+}
+
+async function openTopic(t) {
+  const sheet = $('#sheet')
+  $('#gAva').src = coverUrl(t.cover || t.banner)
+  $('#gName').textContent = t.name
+  $('#gMeta').textContent = `${t.count} 部 · ${fmt(t.click)} 次浏览`
+  $('#gIntro').textContent = t.desc || '官方专题合集'
+  $('#gWorks').innerHTML = '<div class="hint">加载中…</div>'
+  sheet.classList.add('on')
+  try {
+    const r = await (await fetch(`/api/topic?id=${t.id}&page=1`)).json()
+    const rows = $('#gWorks'); rows.innerHTML = ''
+    const vs = r.videos || []
+    if (!vs.length) rows.innerHTML = '<div class="hint">合集内暂无影片</div>'
+    vs.forEach(v => {
+      const el = document.createElement('div')
+      el.className = 'row'
+      el.innerHTML = `
+        <div class="rk">▶</div>
+        <img loading="lazy" src="${coverUrl(v.cover)}" alt="">
+        <div class="info"><div class="nm">${v.name}</div>
+          <div class="sub">${v.actor ? `<span>${v.actor}</span><i class="dot"></i>` : ''}<span>${v.length}</span>${v.flag ? `<i class="dot"></i><span style="color:#EB485A">${v.flag}</span>` : ''}</div>
+        </div>`
+      el.onclick = () => { sheet.classList.remove('on'); playItem({ id: v.id, name: v.name, title: v.name, nav: '专题', views: v.views }) }
+      rows.appendChild(el)
+    })
+  } catch { $('#gWorks').innerHTML = '<div class="hint">加载失败</div>' }
+}
+
+/* ---------- 频道（对齐官方 /tags/channels） ---------- */
+let channelsCache = null
+async function renderChannels() {
+  showOnly('rows')
+  $('#chips').style.display = 'none'
+  $('#hint').style.display = 'block'
+  $('#hint').textContent = '官方频道导航'
+  const box = $('#rows'); box.innerHTML = ''
+  if (!channelsCache) {
+    try { channelsCache = (await (await fetch('/api/channels')).json()).channels || [] } catch { channelsCache = [] }
+  }
+  channelsCache.forEach(c => {
+    const el = document.createElement('div')
+    el.className = 'row'
+    el.innerHTML = `<div class="rk">▸</div>
+      <div class="info"><div class="nm">${c.name}</div>
+      <div class="sub"><span>${c.kind === 'nav' ? '跳转栏目：' + c.nav : (c.name === '最热' ? '按播放量排序' : c.name === 'VIP专区' ? '按收藏量排序' : '最新发布')}</span></div></div>`
+    el.onclick = () => {
+      if (c.kind === 'nav') return renderNav(c.nav)
+      renderChannelList(c.name, c.orderBy || '')
+    }
+    box.appendChild(el)
+  })
+  if (!channelsCache.length) { box.innerHTML = ''; $('#empty').style.display = 'block'; $('#empty').textContent = '频道加载失败' }
+}
+
+async function renderChannelList(name, orderBy) {
+  showOnly('rows')
+  $('#hint').textContent = `${name} · 加载中…`
+  const box = $('#rows'); box.innerHTML = ''
+  try {
+    const r = await (await fetch(`/api/channel?name=${encodeURIComponent(name)}&orderBy=${orderBy}&page=1`)).json()
+    const list = r.list || []
+    $('#hint').textContent = `${name} · 共 ${list.length} 条`
+    list.forEach((it, i) => {
+      const el = document.createElement('div')
+      el.className = 'row'
+      el.innerHTML = `<div class="rk">${i + 1}</div>
+        <img loading="lazy" src="${coverUrl(it.cover)}" alt="">
+        <div class="info"><div class="nm">${it.name}</div>
+          <div class="sub">${it.actor ? `<span>${it.actor}</span><i class="dot"></i>` : ''}<span>${fmt(it.views)} 播放</span>${it.points > 0 ? `<i class="dot"></i><span style="color:#EB485A">${it.points} 积分</span>` : ''}</div>
+        </div>`
+      el.onclick = () => playItem({ id: it.id, name: it.name, title: it.name, nav: name, views: it.views })
+      box.appendChild(el)
+    })
+    if (!list.length) { box.innerHTML = ''; $('#empty').style.display = 'block'; $('#empty').textContent = '暂无内容' }
+  } catch { box.innerHTML = '<div class="hint">加载失败</div>' }
+}
+
+/* ---------- 排行榜 ---------- */
+const PERIODS = [{ d: 0, n: '今日' }, { d: 1, n: '昨日' }, { d: 7, n: '本周' }, { d: 30, n: '本月' }]
+let rankState = { days: 7, tag: 0, tags: null }
+
+async function renderRank(days = rankState.days, tag = rankState.tag) {
+  rankState.days = days; rankState.tag = tag
+  showOnly('rows'); $('#rows').innerHTML = '<div class="hint">加载排行榜…</div>'
+  if (!rankState.tags) {
+    try { rankState.tags = (await (await fetch('/api/rank-tags')).json()).tags || [] } catch { rankState.tags = [] }
+  }
+  const chips = $('#chips'); chips.style.display = 'flex'; $('#hint').style.display = 'block'
+  chips.innerHTML =
+    PERIODS.map(p => `<button data-p="${p.d}" class="${p.d === days ? 'on' : ''}">${p.n}</button>`).join('') +
+    rankState.tags.map(t => `<button data-t="${t.id}" class="${t.id === tag ? 'on' : ''}">${t.name}</button>`).join('')
+  chips.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const nd = b.dataset.p !== undefined ? Number(b.dataset.p) : rankState.days
+    const nt = b.dataset.t !== undefined ? Number(b.dataset.t) : rankState.tag
+    renderRank(nd, nt)
+  })
+  try {
+    const r = await (await fetch(`/api/rank?days=${days}&tag=${tag}`)).json()
+    const list = r.list || []
+    const range = (r.begin && r.end && r.begin !== r.end) ? (r.begin > r.end ? r.begin : r.begin + ' ~ ' + r.end) : (r.begin || '')
+    document.querySelector('#hint').textContent = range + ' · 共 ' + (r.count ?? list.length) + ' 部'
+    const rows = document.querySelector('#rows'); rows.innerHTML = ''
+    const grid = document.createElement('div'); grid.className = 'rgrid'
+    list.forEach(it => {
+      const el = document.createElement('div')
+      el.className = 'rcard'
+      el.innerHTML = `
+        <div class="ph">
+          <img loading="lazy" src="${coverUrl(it.cover)}" alt="" onerror="this.style.opacity=0">
+          <div class="rk ${it.rank <= 3 ? 'top' : ''}">${it.rank}</div>
+          ${it.length ? `<div class="du">${it.length}</div>` : ''}
+        </div>
+        <div class="tx">
+          <div class="tt">${it.name}</div>
+          <div class="sub">
+            ${it.actor ? `<span>${it.actor}</span>` : ''}
+            <span>${fmt(it.views)} 播放</span>
+            ${it.flag ? `<span style="color:#EB485A">${it.flag}</span>` : ''}
+          </div>
+        </div>`
+      el.onclick = () => playItem({ id: it.id, name: it.name, title: it.name, nav: '排行', views: it.views })
+      grid.appendChild(el)
+    })
+    if (list.length) rows.appendChild(grid)
+    if (!list.length) { rows.innerHTML = ''; $('#empty').style.display = 'block'; $('#empty').textContent = '该榜单暂无数据' }
+  } catch (e) { $('#rows').innerHTML = '<div class="hint">排行榜加载失败</div>' }
+}
+
+/* ---------- 女优 ---------- */
+const LETTERS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
+async function renderGirls(letter = 'A') {
+  showOnly('girls')
+  const chips = $('#chips'); chips.style.display = 'flex'; $('#hint').style.display = 'block'
+  $('#hint').textContent = '按首字母浏览 · 点开看她的作品'
+  chips.innerHTML = LETTERS.map(l => `<button data-l="${l}" class="${l === letter ? 'on' : ''}">${l}</button>`).join('')
+  chips.querySelectorAll('button').forEach(b => b.onclick = () => renderGirls(b.dataset.l))
+  const grid = $('#ggrid'); grid.innerHTML = '<div class="hint">加载中…</div>'
+  try {
+    const r = await (await fetch(`/api/girls?letter=${letter}`)).json()
+    const girls = r.girls || []
+    grid.innerHTML = ''
+    girls.forEach(g => {
+      const el = document.createElement('div')
+      el.className = 'g'
+      el.innerHTML = `<div class="ava"><img loading="lazy" src="${coverUrl(g.avatar)}" alt=""></div><div class="n">${g.name}</div>`
+      el.onclick = () => openGirl(g)
+      grid.appendChild(el)
+    })
+    if (!girls.length) { grid.innerHTML = ''; $('#empty').style.display = 'block'; $('#empty').textContent = '这个字母下没有女优' }
+  } catch { grid.innerHTML = '<div class="hint">加载失败</div>' }
+}
+
+async function openGirl(g) {
+  const sheet = $('#sheet')
+  $('#gAva').src = coverUrl(g.avatar)
+  $('#gName').textContent = g.name
+  $('#gMeta').textContent = '加载中…'
+  $('#gIntro').textContent = ''
+  $('#gWorks').innerHTML = ''
+  sheet.classList.add('on')
+  try {
+    const r = await (await fetch(`/api/girl?id=${g.id}`)).json()
+    const d = r.girl || {}
+    $('#gAva').src = coverUrl(d.avatar || g.avatar)
+    $('#gName').textContent = d.name || g.name
+    $('#gMeta').textContent = [d.country, d.birthday, d.height, d.cup ? d.cup + ' 罩杯' : '', d.bwh].filter(Boolean).join(' · ')
+    $('#gIntro').textContent = d.intro || ''
+    const rows = $('#gWorks'); rows.innerHTML = ''
+    const works = r.works || []
+    if (!works.length) rows.innerHTML = '<div class="hint">暂无作品</div>'
+    works.forEach(w => {
+      const el = document.createElement('div')
+      el.className = 'row'
+      el.innerHTML = `
+        <div class="rk">▶</div>
+        <img loading="lazy" src="${coverUrl(w.cover)}" alt="">
+        <div class="info"><div class="nm">${w.name}</div>
+          <div class="sub"><span>${w.length}</span>${w.flag ? `<i class="dot"></i><span style="color:#EB485A">${w.flag}</span>` : ''}</div>
+        </div>`
+      el.onclick = () => { sheet.classList.remove('on'); playItem({ id: w.id, name: w.name, title: w.name, nav: '女优作品', views: w.views }) }
+      rows.appendChild(el)
+    })
+  } catch { $('#gMeta').textContent = '加载失败' }
+}
+$('#sheetClose').onclick = () => $('#sheet').classList.remove('on')
+$('#sheet').onclick = e => { if (e.target.id === 'sheet') $('#sheet').classList.remove('on') }
+
+/* ---------- 栏目 ---------- */
+function renderNav(nav) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.nav === nav))
+  $('#chips').style.display = 'none'; $('#hint').style.display = 'none'
+  if (nav === '排行') return renderRank()
+  if (nav === '女优') return renderGirls()
+  if (nav === '专题') return renderTopics()
+  if (nav === '频道') return renderChannels()
+  showOnly('grid')
+  const list = data.items.filter(i => i.nav === nav)
+  const grid = $('#grid'); grid.innerHTML = ''
+  list.forEach(it => grid.appendChild(card(it)))
+  if (!list.length) { $('#empty').style.display = 'block'; $('#empty').textContent = '这个栏目暂无内容' }
+  window.scrollTo({ top: 0, behavior: 'instant' })
+}
+
+fetch('/data.json').then(r => r.json()).then(d => {
+  data = d
+  $('#brand').textContent = d.brand
+  $('#sub').textContent = `${d.subtitle} · ${d.day}`
+  $('#stat').textContent = `${d.items.length} 部在线`
+  const tabs = $('#tabs')
+  ;['排行', '女优', '专题', '频道', ...d.tabs].forEach(n => {
+    const b = document.createElement('button')
+    b.textContent = ['排行', '女优', '专题', '频道'].includes(n) ? n : `${n} ${d.counts[n] ?? ''}`
+    b.dataset.nav = n
+    b.onclick = () => renderNav(n)
+    tabs.appendChild(b)
+  })
+  renderNav('排行')
+  window.__gjReady = true
+}).catch(e => toast('数据加载失败：' + e.message))
+</script>
+<script>
+if (typeof window.__gjReady === 'undefined') window.__gjReady = false
+setTimeout(function () {
+  if (window.__gjReady) return
+  var d = document.createElement('div')
+  d.style.cssText = 'position:fixed;inset:0;padding:28px 20px;background:#fff;color:#333;font:14px/1.7 -apple-system,sans-serif;text-align:center;z-index:9999'
+  d.innerHTML = '<h3 style="margin:40px 0 10px">页面脚本没有启动</h3>'
+    + '<p>常见原因：浏览器版本过旧（需要 iOS 15+ / Chrome 90+），或脚本被拦截。</p>'
+    + '<p style="color:#888;font-size:12px;word-break:break-all">' + navigator.userAgent + '</p>'
+  document.body.appendChild(d)
+}, 4000)
+</script><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function () {})
+  })
+}
+</script>
+<script>
+(function () {
+  var TOTAL = 5000
+  var el = document.getElementById('splash')
+  var num = document.getElementById('spNum')
+  var fill = document.getElementById('spFill')
+  if (!el) return
+  var start = Date.now()
+  var timer = setInterval(function () {
+    var done = Date.now() - start
+    var left = Math.max(0, TOTAL - done)
+    if (num) num.textContent = Math.ceil(left / 1000)
+    if (fill) fill.style.width = Math.min(100, (done / TOTAL) * 100) + '%'
+    if (done >= TOTAL) {
+      clearInterval(timer)
+      el.classList.add('hide')
+      setTimeout(function () { el.remove() }, 600)
+    }
+  }, 80)
+})()
+</script></body>
+</html>

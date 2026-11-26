@@ -1,0 +1,20 @@
+# 运行时产物与私密文件，不进仓库
+.cache/
+media/
+node_modules/
+
+# 密钥与密码（绝不入库）
+.auth-secret
+.auth-secret.bak
+.password
+server.mjs.bak-auth
+
+# 日志
+server.out
+server.err
+
+# 历史截图
+preview*.png
+# frp 真实配置（含 token）
+frpc.toml
+
